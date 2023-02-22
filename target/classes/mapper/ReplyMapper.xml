@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+   <mapper namespace="replyDao">
+  
+  	<resultMap type="reply" id="boardReplyInfo">
+  		<result column="rn" property="rowNum"/>
+  		<result column="reply_idx" property="replyIdx" />
+  		<result column="reply_content" property="replyContent" />
+  		<result column="reply_regdate" property="replyRegdate" />
+  		<result column="num" property="num" />
+  		<result column="mem_idx" property="memIdx" />
+  		<result column="mem_id" property="memId"/>
+  		<result column="file_name" property="fileName"/>
+  		<result column="file_path" property="filePath"/>
+  		<result column="file_uuid" property="fileUuid"/>
+  	
+  	</resultMap>
+  
+  <!-- 댓글 조회 -->
+  <!-- 
+  <select id="replyList" parameterType="HashMap" resultMap="boardReplyInfo">
+  	select r.reply_idx,
+  		   r.reply_content,
+  		   to_char(reply_regdate,'yyyy-mm-dd') as reply_regdate,
+  		   r.num,
+  		   r.mem_idx,
+  		   m.mem_id,
+  		   m.file_name,
+	       m.file_path,
+	       m.file_uuid
+  	from youtube_reply_jjh r inner join youtube_member_jjh m
+  	on r.mem_idx = m.mem_idx
+  	where r.num = #{num}
+  	order by reply_idx desc
+  	
+  </select>
+   -->
+  
+  <!-- 
+<select id="replyList" parameterType="HashMap" resultMap="boardReplyInfo">
+/* 댓글 조회 쿼리 */
+  	select 
+        reply_idx,
+        reply_content,
+        reply_regdate,
+        num,
+        mem_idx,
+        mem_id,
+        file_name,
+        file_path,
+        file_uuid
+       
+    from(
+        select
+            rownum as rn,
+            a.*
+           from (
+            select
+                    r.reply_idx,
+                    r.reply_content,
+                    to_char(reply_regdate,'yyyy-mm-dd') as reply_regdate,
+                    r.num,
+                    r.mem_idx,
+                    m.mem_id,
+                    m.file_name,
+                    m.file_path,
+                    m.file_uuid
+                from
+                    youtube_reply_jjh r, youtube_member_jjh m
+                where
+                    r.mem_idx = m.mem_idx
+                and
+                    r.num = #{num}
+                
+            ) a
+    )b
+    where
+        rn between #{start} and #{end};
+  	
+  </select>
+    --> 
+  
+   
+  <select id="replyList" parameterType="HashMap" resultMap="boardReplyInfo">
+	/* 댓글 페이징 조회 쿼리 */
+  	SELECT *
+		FROM
+		    (
+		        SELECT
+		            ROWNUM AS rn,
+		            a.*
+		        FROM
+		            (
+		                SELECT
+		                    r.reply_idx,
+		                    r.reply_content,
+		                    to_char(reply_regdate, 'yyyy-mm-dd') AS reply_regdate,
+		                    r.num,
+		                    r.mem_idx,
+		                    m.mem_id,
+		                    m.file_name,
+		                    m.file_path,
+		                    m.file_uuid
+		                FROM
+		                     youtube_reply_jjh   r
+		                    FULL OUTER JOIN youtube_member_jjh  m ON r.mem_idx = m.mem_idx
+		                WHERE
+		                    r.num = #{num}
+		                ORDER BY
+		                    reply_idx DESC
+		            ) a
+		    )
+
+   <![CDATA[
+	WHERE RN BETWEEN (#{criteria.page} - 1) * #{criteria.perPageNum} + 1 AND #{criteria.page} * #{criteria.perPageNum}
+	]]>
+  	
+  </select>
+
+  <!-- 댓글 수 -->
+<select id="replyCount" resultType="Integer">
+  
+  	select  count(distinct reply_idx) as reply_idx
+	from youtube_reply_jjh
+	where num = #{num}
+  		
+  
+  </select>
+  
+  	<!-- 댓글 등록 -->
+  	<insert id="registerReply" parameterType="HashMap">
+  		insert into youtube_reply_jjh(
+  			reply_idx,
+  			reply_content,
+  			reply_regdate,
+  			num,
+  			mem_idx
+  		)
+  		values(
+  			youtube_reply_jjh_seq.nextval,
+  			#{replyContent},
+  			SYSDATE,
+  			#{num},
+  			#{memIdx}   
+  		)
+  	
+  	</insert>
+  	
+  	<!-- 댓글 삭제 -->
+  	<delete id="deleteReply" parameterType="int">
+  		delete from youtube_reply_jjh
+  		where reply_idx = #{replyIdx}
+  	</delete>
+  	
+  	<!-- 댓글 수정 -->
+  	<update id="updateReply" parameterType="reply">
+  		update youtube_reply_jjh
+  		set reply_content = #{replyContent},
+  		 	reply_regdate = SYSDATE
+  		where reply_idx = #{replyIdx}
+  	</update>
+  	
+  	<!-- 댓글 수 -->
+  	<select id="countReply" resultType="Integer">
+ 		select count(reply_idx)
+ 		from youtube_reply_jjh
+ 		where num = #{num}
+ 	</select> 
+  
+  
+  </mapper>
