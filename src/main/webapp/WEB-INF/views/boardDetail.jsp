@@ -179,13 +179,17 @@
       </div> <!-- div.centerContent end -->
 
       <style>
+        #commentList{
+          margin-bottom:100px;
+        }
+
         .fadein
               {
-                -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-                -moz-animation: fadein 1s; /* Firefox < 16 */
-                -ms-animation: fadein 1s; /* Internet Explorer */
-                -o-animation: fadein 1s; /* Opera < 12.1 */
-                animation: fadein 1s;
+                -webkit-animation: fadein 1.5s; /* Safari, Chrome and Opera > 12.1 */
+                -moz-animation: fadein 1.5s; /* Firefox < 16 */
+                -ms-animation: fadein 1.5s; /* Internet Explorer */
+                -o-animation: fadein 1.5s; /* Opera < 12.1 */
+                animation: fadein 1.5s;
               }
               @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
               /* Firefox < 16 */
@@ -211,7 +215,7 @@
 
         // const replyCnt = `${replyCount}`;
         // console.log("replyCnt12223",replyCnt);
-
+        
 
         console.log("findFollow:" +"${findFollow}");
         //회원 구독 상태
@@ -309,11 +313,16 @@
 		//스크롤부터는 2부터 시작되는거 같음
 		$(window).scroll(function(){   
 		     if($(window).scrollTop() >= $(document).height() - $(window).height()){
-          getCommentNextList(page)
+
+          setTimeout(function(){
+            getCommentNextList(page);
 		           page++;   
               //  var delayStyle = $(".delayStyle");
               //   delayStyle.delay(300).fadeIn;
                console.log("page추가:",page);
+            
+          },100)
+          
 		     } 
 		});
 
@@ -337,7 +346,7 @@
           //   console.log("댓글 불러오기 끝");
           //   return false;
           // }
-         
+          
           //console.log("댓글 조회 page:" + page);
           $("#page").val(nowPage);
           $.ajax({
@@ -422,6 +431,7 @@ htmlStr += "<div class=\"form-inline replyProfileImg mb-2\" ><img src=\"./resour
   //	alert('댓글')
   //$("#commentList").html("");
   $("#commentList").append(htmlStr);
+
 
 
 
